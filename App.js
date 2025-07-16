@@ -14,7 +14,7 @@ const App = () => {
   return (
     <View style={styles.container}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <Text style={styles.text}>Welcome to React Native JS !</Text>
+      <Text style={styles.text}>Welcome to React Native JS!</Text>
     </View>
   );
 };
