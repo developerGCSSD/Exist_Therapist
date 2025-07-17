@@ -1,11 +1,29 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import React from 'react';
+import WeeklyCalendar from '../../components/calendar'; // adjust path if needed
 
 export default function TodaySchedule() {
+  const handleDatePress = date => {
+    console.log('Selected date:', date.format('YYYY-MM-DD'));
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Today's Schedule</Text>
-      <Text style={styles.subtitle}>You have no appointments today.</Text>
+      {/* Calendar at the top */}
+      <View style={styles.calendarWrapper}>
+        <WeeklyCalendar
+          onDatePress={date => console.log('Selected date:', date.format())}
+          onMonthPress={() =>
+            console.log('Month clicked! Show picker or modal')
+          }
+        />
+      </View>
+
+      {/* Schedule message */}
+      <View style={styles.messageContainer}>
+        <Text style={styles.title}>Today's Schedule</Text>
+        <Text style={styles.subtitle}>You have no appointments today.</Text>
+      </View>
     </View>
   );
 }
@@ -13,10 +31,19 @@ export default function TodaySchedule() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
     backgroundColor: '#F9FAFB',
+  },
+  calendarWrapper: {
+    marginTop: 100,
+    borderBottomWidth: 1,
+    borderColor: '#E0E0E0',
+    backgroundColor: '#fff',
+  },
+  messageContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 24,
   },
   title: {
     fontSize: 22,
