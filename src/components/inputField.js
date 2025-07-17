@@ -14,6 +14,7 @@ export default function InputField({
   value,
   onChangeText,
   secure = false,
+  error = false,
 }) {
   //& refs attached to the TextInput and container View.
   const inputRef = useRef();
@@ -27,7 +28,7 @@ export default function InputField({
 
   const handleBlur = () => {
     containerRef.current.setNativeProps({
-      style: styles.container,
+      style: error ? styles.errorContainer : styles.container,
     });
   };
 
@@ -42,7 +43,10 @@ export default function InputField({
         </Text>
       )}
 
-      <View ref={containerRef} style={styles.container}>
+      <View
+        ref={containerRef}
+        style={error ? styles.errorContainer : styles.container}
+      >
         <TextInput
           ref={inputRef}
           style={styles.input}
@@ -118,5 +122,14 @@ const styles = StyleSheet.create({
     right: 16,
     top: '50%',
     transform: [{ translateY: -10 }],
+  },
+  errorContainer: {
+    ...baseBorder,
+    borderColor: '#880727',
+    shadowColor: '#880727',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
 });

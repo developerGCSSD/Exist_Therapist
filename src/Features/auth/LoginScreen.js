@@ -15,6 +15,9 @@ import LinearGradient from 'react-native-linear-gradient';
 import InputField from '../../components/inputField';
 import PrimaryButton from '../../components/primaryButton';
 import ExistLogo from '../../assets/images/logo';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginThunk } from '../auth/authSlice';
+import { useNavigation } from '@react-navigation/native';
 
 const { height } = Dimensions.get('window');
 
@@ -25,8 +28,24 @@ export default function LoginScreen() {
 
   const isFormValid = username.trim() && password.trim();
 
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const user = useSelector(state => state.user?.user);
+  const isLoading = useSelector(state => state.user?.isLoading);
+  const error = useSelector(state => state.user?.error);
+  const success = useSelector(state => state.user?.success);
+
+  useEffect(() => {
+    if (success) {
+      navigation.replace('Home');
+      console.log('success');
+    }
+  }, [navigation, success]);
+
   const handleLogin = () => {
-    // Proceed with login logic (e.g. API call)
+    dispatch(
+      loginThunk({ userName: username.trim(), password: password.trim() }),
+    );
   };
 
   // Listen to keyboard events
@@ -83,6 +102,18 @@ export default function LoginScreen() {
               <Text style={styles.greetingSubtitle}>
                 Welcome back please enter your details
               </Text>
+              {error && (
+                <View style={styles.errorBox}>
+                  <View style={styles.errorIcon}>
+                    <Text style={styles.errorIconText}>×</Text>
+                  </View>
+                  <Text style={styles.errorMessageText}>
+                    {typeof error === 'string'
+                      ? error
+                      : error.message || 'Login failed'}
+                  </Text>
+                </View>
+              )}
             </View>
 
             <View style={[styles.inputSection]}>
@@ -91,6 +122,7 @@ export default function LoginScreen() {
                 placeholder="Enter your username"
                 value={username}
                 onChangeText={setUsername}
+                error={!!error}
               />
               <InputField
                 label="Password"
@@ -98,7 +130,9 @@ export default function LoginScreen() {
                 secure
                 value={password}
                 onChangeText={setPassword}
+                error={!!error}
               />
+
               <TouchableOpacity style={styles.forgotWrapper} onPress={() => {}}>
                 <Text style={styles.forgotText}>Forgot Password?</Text>
               </TouchableOpacity>
@@ -109,6 +143,8 @@ export default function LoginScreen() {
                 title="Login"
                 onPress={handleLogin}
                 disabled={!isFormValid}
+                loading={isLoading}
+                width="392"
               />
             </View>
           </View>
@@ -137,7 +173,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: height * 0.5,
+    height: height * 0.53,
     backgroundColor: '#fff',
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
@@ -191,5 +227,32 @@ const styles = StyleSheet.create({
   },
   greetingWrapperExpanded: {
     marginTop: 100,
+  },
+  errorBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF0F4',
+    padding: 12,
+    borderRadius: 10,
+    marginTop: 12,
+  },
+  errorIcon: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#880727',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  errorIconText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  errorMessageText: {
+    color: '#880727',
+    fontSize: 14,
+    flexShrink: 1,
   },
 });
