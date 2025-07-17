@@ -1,28 +1,50 @@
-import React, { useState } from 'react';
+/* eslint-disable react-native/no-inline-styles */
+import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
-  Image,
-  Dimensions,
   Text,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  ScrollView,
+  Keyboard,
+  Platform,
+  Dimensions,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import InputField from '../../components/inputField';
 import PrimaryButton from '../../components/primaryButton';
-import logo from '../../assets/images/logo.png';
+import ExistLogo from '../../assets/images/logo';
 
 const { height } = Dimensions.get('window');
 
 export default function LoginScreen() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
 
   const isFormValid = username.trim() && password.trim();
 
   const handleLogin = () => {
     // Proceed with login logic (e.g. API call)
   };
+
+  // Listen to keyboard events
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      () => setKeyboardOpen(true),
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setKeyboardOpen(false),
+    );
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   return (
     <LinearGradient
@@ -31,51 +53,67 @@ export default function LoginScreen() {
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 0 }}
     >
-      <View style={styles.wrapper}>
-        {/* Logo at top */}
-        <View style={styles.logoWrapper}>
-          <Image source={logo} style={styles.logo} resizeMode="contain" />
-        </View>
+      <KeyboardAvoidingView behavior="height" style={{ flex: 1 }}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Logo at top */}
+          {!keyboardOpen && (
+            <View style={styles.logoWrapper}>
+              <ExistLogo width={'236'} height={'133'} />
+            </View>
+          )}
 
-        {/* White card */}
-        <View style={styles.cardContainer}>
-          <View style={styles.greetingWrapper}>
-            <Text style={styles.greetingTitle}>Hi There!</Text>
-            <Text style={styles.greetingSubtitle}>
-              Welcome back please enter your details
-            </Text>
+          {/* White card */}
+          <View
+            style={[
+              styles.cardContainer,
+              keyboardOpen && styles.cardContainerExpanded,
+            ]}
+          >
+            <View
+              style={[
+                styles.greetingWrapper,
+                keyboardOpen && styles.greetingWrapperExpanded,
+              ]}
+            >
+              <Text style={styles.greetingTitle}>Hi There!</Text>
+              <Text style={styles.greetingSubtitle}>
+                Welcome back please enter your details
+              </Text>
+            </View>
+
+            <View style={[styles.inputSection]}>
+              <InputField
+                label="Username"
+                placeholder="Enter your username"
+                value={username}
+                onChangeText={setUsername}
+              />
+              <InputField
+                label="Password"
+                placeholder="Enter your password"
+                secure
+                value={password}
+                onChangeText={setPassword}
+              />
+              <TouchableOpacity style={styles.forgotWrapper} onPress={() => {}}>
+                <Text style={styles.forgotText}>Forgot Password?</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={[styles.buttonWrapper]}>
+              <PrimaryButton
+                title="Login"
+                onPress={handleLogin}
+                disabled={!isFormValid}
+              />
+            </View>
           </View>
-
-          <View style={styles.inputSection}>
-            <InputField
-              label="Username"
-              placeholder="Enter your username"
-              value={username}
-              onChangeText={setUsername}
-            />
-
-            <InputField
-              label="Password"
-              placeholder="Enter your password"
-              secure
-              value={password}
-              onChangeText={setPassword}
-            />
-
-            <TouchableOpacity style={styles.forgotWrapper} onPress={() => {}}>
-              <Text style={styles.forgotText}>Forgot Password?</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.buttonWrapper}>
-            <PrimaryButton
-              title="Login"
-              onPress={handleLogin}
-              disabled={!isFormValid}
-            />
-          </View>
-        </View>
-      </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </LinearGradient>
   );
 }
@@ -84,17 +122,15 @@ const styles = StyleSheet.create({
   gradientContainer: {
     flex: 1,
   },
-  wrapper: {
-    flex: 1,
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'flex-start',
   },
   logoWrapper: {
     alignItems: 'center',
-    marginTop: 30,
-    marginBottom: 10,
-  },
-  logo: {
-    width: 250,
-    height: 450,
+    justifyContent: 'center',
+    paddingTop: 201,
+    paddingHorizontal: 102,
   },
   cardContainer: {
     position: 'absolute',
@@ -116,8 +152,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     zIndex: 10,
   },
-  buttonWrapper: {
-    paddingBottom: 30,
+  cardContainerExpanded: {
+    position: 'relative',
+    flex: 1,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    paddingTop: 60,
+    zIndex: 10,
   },
   greetingWrapper: {
     marginBottom: 20,
@@ -132,6 +173,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6C6C89',
   },
+  inputSection: {
+    marginBottom: 20,
+  },
   forgotWrapper: {
     alignItems: 'flex-end',
     marginBottom: 10,
@@ -141,5 +185,11 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
     fontSize: 13,
     fontWeight: '400',
+  },
+  buttonWrapper: {
+    paddingBottom: 30,
+  },
+  greetingWrapperExpanded: {
+    marginTop: 100,
   },
 });
