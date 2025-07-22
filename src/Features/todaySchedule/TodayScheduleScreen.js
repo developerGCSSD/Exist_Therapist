@@ -1,25 +1,21 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import React from 'react';
-import WeeklyCalendar from '../../components/calendar'; // adjust path if needed
+import { View, Text, StyleSheet } from 'react-native';
+import WeeklyCalendar from '../../components/calendar';
 
 export default function TodaySchedule() {
   const handleDatePress = date => {
-    console.log('Selected date:', date.format('YYYY-MM-DD'));
+    if (date) {
+      console.log('Selected date:', date.format('YYYY-MM-DD'));
+    } else {
+      console.log('Date cleared');
+    }
   };
-
   return (
     <View style={styles.container}>
-      {/* Calendar at the top */}
       <View style={styles.calendarWrapper}>
-        <WeeklyCalendar
-          onDatePress={date => console.log('Selected date:', date.format())}
-          onMonthPress={() =>
-            console.log('Month clicked! Show picker or modal')
-          }
-        />
+        <WeeklyCalendar onDatePress={handleDatePress} />
       </View>
 
-      {/* Schedule message */}
       <View style={styles.messageContainer}>
         <Text style={styles.title}>Today's Schedule</Text>
         <Text style={styles.subtitle}>You have no appointments today.</Text>

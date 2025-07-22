@@ -7,6 +7,8 @@ import store from './src/store/reduxStore';
 import LoginScreen from './src/Features/auth/LoginScreen';
 import TodaySchedule from './src/Features/todaySchedule/TodayScheduleScreen';
 
+import { ActionSheetProvider } from '@expo/react-native-action-sheet';
+
 const Stack = createNativeStackNavigator();
 
 function RootNavigator() {
@@ -21,9 +23,11 @@ function RootNavigator() {
 export default function App() {
   return (
     <Provider store={store}>
-      <NavigationContainer>
-        <RootNavigator />
-      </NavigationContainer>
+      <ActionSheetProvider>
+        <NavigationContainer>
+          <RootNavigator />
+        </NavigationContainer>
+      </ActionSheetProvider>
     </Provider>
   );
 }
