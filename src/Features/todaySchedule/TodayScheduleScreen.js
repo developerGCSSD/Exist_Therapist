@@ -1,8 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import WeeklyCalendar from '../../components/calendar';
+import TopNavBar from '../../components/topNavBar';
 
-export default function TodaySchedule() {
+const NAVBAR_HEIGHT = '14%'; // Height of the top navigation bar
+
+export default function TodaySchedule({ navigation }) {
   const handleDatePress = date => {
     if (date) {
       console.log('Selected date:', date.format('YYYY-MM-DD'));
@@ -10,30 +14,57 @@ export default function TodaySchedule() {
       console.log('Date cleared');
     }
   };
+
   return (
-    <View style={styles.container}>
-      <View style={styles.calendarWrapper}>
-        <WeeklyCalendar onDatePress={handleDatePress} />
+    <LinearGradient
+      colors={['#0C3862', '#5AA5EE']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
+      style={styles.root}
+    >
+      <View style={styles.navContainer}>
+        <TopNavBar
+          title="Today's Schedule"
+          showBack={false}
+          showBell={true}
+          onBellPress={() => console.log('Notifications')}
+        />
       </View>
 
-      <View style={styles.messageContainer}>
-        <Text style={styles.title}>Today's Schedule</Text>
-        <Text style={styles.subtitle}>You have no appointments today.</Text>
+      <View style={styles.contentContainer}>
+        <View>
+          <WeeklyCalendar onDatePress={handleDatePress} />
+        </View>
+
+        <View style={styles.messageContainer}>
+          <Text style={styles.title}>Today's Schedule</Text>
+          <Text style={styles.subtitle}>You have no appointments today.</Text>
+        </View>
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
-  calendarWrapper: {
-    marginTop: 100,
-    borderBottomWidth: 1,
-    borderColor: '#E0E0E0',
+  navContainer: {
+    zIndex: 5,
+    paddingBottom: 8,
+    paddingHorizontal: 0,
+  },
+  contentContainer: {
+    position: 'absolute',
+    top: NAVBAR_HEIGHT,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 10,
     backgroundColor: '#fff',
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    overflow: 'hidden',
   },
   messageContainer: {
     flex: 1,
