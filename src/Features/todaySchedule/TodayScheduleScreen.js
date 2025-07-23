@@ -1,12 +1,15 @@
-import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import WeeklyCalendar from '../../components/calendar';
 import TopNavBar from '../../components/topNavBar';
+import SegmentedTabs from '../../components/segmentedTaps';
 
-const NAVBAR_HEIGHT = '14%'; // Height of the top navigation bar
+const NAVBAR_HEIGHT = '14%';
 
 export default function TodaySchedule({ navigation }) {
+  const [selectedTab, setSelectedTab] = useState('all');
+
   const handleDatePress = date => {
     if (date) {
       console.log('Selected date:', date.format('YYYY-MM-DD'));
@@ -14,6 +17,12 @@ export default function TodaySchedule({ navigation }) {
       console.log('Date cleared');
     }
   };
+
+  const tabs = [
+    { label: 'All', value: 'all' },
+    { label: 'Current', value: 'current' },
+    { label: 'History', value: 'history' },
+  ];
 
   return (
     <LinearGradient
@@ -35,6 +44,13 @@ export default function TodaySchedule({ navigation }) {
         <View>
           <WeeklyCalendar onDatePress={handleDatePress} />
         </View>
+
+        {/* Segmented Tabs */}
+        <SegmentedTabs
+          tabs={tabs}
+          selected={selectedTab}
+          onSelect={setSelectedTab}
+        />
 
         <View style={styles.messageContainer}>
           <Text style={styles.title}>Today's Schedule</Text>

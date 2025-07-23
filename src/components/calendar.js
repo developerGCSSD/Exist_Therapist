@@ -173,29 +173,33 @@ export default function WeeklyCalendar({ onDatePress }) {
                     {Array.from(
                       { length: 30 },
                       (_, i) => currentYear - 15 + i,
-                    ).map(year => (
-                      <TouchableOpacity
-                        key={year}
-                        onPress={() => {
-                          setSelectedYear(year);
-                          setCurrentMonth(prev => prev.clone().year(year));
-                          setShowYearDropdown(false);
-                        }}
-                        style={[
-                          styles.yearOption,
-                          year === selectedYear && styles.selectedYearOption,
-                        ]}
-                      >
-                        <Text
+                    ).map((year, index, arr) => (
+                      <View key={year}>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setSelectedYear(year);
+                            setCurrentMonth(prev => prev.clone().year(year));
+                            setShowYearDropdown(false);
+                          }}
                           style={[
-                            styles.yearOptionText,
-                            year === selectedYear &&
-                              styles.selectedYearOptionText,
+                            styles.yearOption,
+                            year === selectedYear && styles.selectedYearOption,
                           ]}
                         >
-                          {year}
-                        </Text>
-                      </TouchableOpacity>
+                          <Text
+                            style={[
+                              styles.yearOptionText,
+                              year === selectedYear &&
+                                styles.selectedYearOptionText,
+                            ]}
+                          >
+                            {year}
+                          </Text>
+                        </TouchableOpacity>
+                        {index < arr.length - 1 && (
+                          <View style={styles.yearDivider} />
+                        )}
+                      </View>
                     ))}
                   </ScrollView>
                 </View>
@@ -412,7 +416,7 @@ const styles = StyleSheet.create({
   },
   yearOption: {
     paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingHorizontal: 10,
   },
   selectedYearOption: {
     backgroundColor: '#EDF2FF',
@@ -428,8 +432,8 @@ const styles = StyleSheet.create({
   },
   yearDropdown: {
     position: 'absolute',
-    top: 100,
-    left: 100,
+    top: 90,
+    left: 120,
     backgroundColor: '#fff',
     borderRadius: 8,
     borderWidth: 1,
@@ -437,6 +441,11 @@ const styles = StyleSheet.create({
     zIndex: 999,
     paddingVertical: 8,
     maxHeight: 150,
-    width: '50%',
+    width: '40%',
+  },
+  yearDivider: {
+    height: 1,
+    backgroundColor: '#E0E0E0',
+    marginHorizontal: 10,
   },
 });
