@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import {
   TouchableOpacity,
@@ -13,6 +12,8 @@ export default function SecondaryButton({
   loading = false,
   disabled = false,
   width = '100%',
+  height = 50, // ✅ default height
+  fontSize = 16, // ✅ default font size
 }) {
   const isDisabled = disabled || loading;
 
@@ -24,6 +25,7 @@ export default function SecondaryButton({
         styles.button,
         {
           width,
+          height,
           opacity: isDisabled ? 0.6 : 1,
           backgroundColor: '#FFFFFF',
           borderColor: '#D7D7D7',
@@ -34,7 +36,7 @@ export default function SecondaryButton({
       {loading ? (
         <ActivityIndicator color="#121217" />
       ) : (
-        <Text style={styles.text}>{title}</Text>
+        <Text style={[styles.text, { fontSize }]}>{title}</Text>
       )}
     </TouchableOpacity>
   );
@@ -42,7 +44,6 @@ export default function SecondaryButton({
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 14,
     paddingHorizontal: 20,
     borderRadius: 8,
     alignItems: 'center',
@@ -51,6 +52,5 @@ const styles = StyleSheet.create({
   text: {
     color: '#121217',
     fontWeight: '600',
-    fontSize: 16,
   },
 });
