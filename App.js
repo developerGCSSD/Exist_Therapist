@@ -10,6 +10,7 @@ import TodaySchedule from './src/Features/todaySchedule/TodayScheduleScreen';
 import DashboardScreen from './src/Features/dashboard/DashBoard';
 import ToDoScreen from './src/Features/todo/Todo';
 import MyRequestScreen from './src/Features/myRequest/MyRequest';
+import OnboardingScreen from './src/Features/onboarding/onboarding';
 
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -61,6 +62,7 @@ function BottomTabs() {
 function RootNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Home" component={BottomTabs} />
     </Stack.Navigator>
