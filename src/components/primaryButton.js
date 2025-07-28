@@ -13,6 +13,8 @@ export default function PrimaryButton({
   loading = false,
   disabled = false,
   width = '100%',
+  height = 50, // ✅ default height
+  fontSize = 16, // ✅ default font size
 }) {
   const isDisabled = disabled || loading;
 
@@ -24,6 +26,7 @@ export default function PrimaryButton({
         styles.button,
         {
           width,
+          height,
           opacity: isDisabled ? 0.6 : 1,
           backgroundColor: isDisabled ? '#D7D7D7' : '#3463E9',
         },
@@ -32,7 +35,7 @@ export default function PrimaryButton({
       {loading ? (
         <ActivityIndicator color="#FFF" />
       ) : (
-        <Text style={styles.text}>{title}</Text>
+        <Text style={[styles.text, { fontSize }]}>{title}</Text>
       )}
     </TouchableOpacity>
   );
@@ -40,8 +43,7 @@ export default function PrimaryButton({
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 14,
-    paddingHorizontal: 20,
+    paddingVertical: 10,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
