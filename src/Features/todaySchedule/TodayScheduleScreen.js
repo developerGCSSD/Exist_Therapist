@@ -248,6 +248,9 @@ export default function TodaySchedule({ navigation }) {
 
         <ScrollView contentContainerStyle={styles.cardsContainer}>
           {generateHourlyTimeline().map((item, index, arr) => {
+            if (selectedTab === 'previous' && item.type === 'available') {
+              return null; // 👈 skip available time in "Previous" tab
+            }
             const start = moment(item.startTime, 'HH:mm');
             const end = moment(item.endTime, 'HH:mm');
 
