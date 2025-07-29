@@ -21,8 +21,18 @@ export default function TimelineIndicator({
           ]}
         />
 
-        <View style={styles.dot} />
-        <View style={styles.line} />
+        <View
+          style={[
+            styles.dot,
+            { backgroundColor: isGap ? '#3CB371' : '#007AFF' },
+          ]}
+        />
+        <View
+          style={[
+            styles.line,
+            { backgroundColor: isGap ? '#3CB371' : '#C7C7CC' }, // green if free time
+          ]}
+        />
       </View>
       <Text style={styles.timeText}>{endTime}</Text>
     </View>
@@ -47,7 +57,7 @@ const styles = StyleSheet.create({
   },
   line: {
     width: 2,
-    height: 25,
+    height: 20,
     backgroundColor: '#C7C7CC',
   },
   dot: {
