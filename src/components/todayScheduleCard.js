@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  ScrollView,
+} from 'react-native';
 import PrimaryButton from './primaryButton';
 import SecondaryButton from './secondaryButton';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -26,6 +33,8 @@ export default function TodayScheduleCard({
   const [modalType, setModalType] = useState('end'); // 'end' or 'early'
   const [showDurationModal, setShowDurationModal] = useState(false);
   const [duration, setDuration] = useState('');
+  const [showIntakeModal, setShowIntakeModal] = useState(false);
+  const [expandedSection, setExpandedSection] = useState(null); // 'physical' | 'mental' | null
 
   const handleStart = () => {
     setStarted(true);
@@ -52,6 +61,68 @@ export default function TodayScheduleCard({
     setModalType('noShow');
     setShowEndSessionModal(true);
   };
+
+  const physicalHealthData = [
+    {
+      question: 'Do you suffer from any medical problems?',
+      answer: 'Diabetes and blood pressure',
+    },
+    {
+      question: 'List current medication:',
+      answer: 'Metformin, insulin glargine',
+    },
+    {
+      question: 'Doctors Name',
+      answer: 'Doctor name',
+    },
+    {
+      question: 'Telephone number',
+      answer: '+2010985958952',
+    },
+    {
+      question: 'Do you exercise?  How much? Since when?',
+      answer: 'Yes, three times , 2022',
+    },
+    {
+      question: 'Do you Smoke?  How much? Since when?',
+      answer: 'Yes, three times , 2022',
+    },
+    {
+      question: 'Do you drink?  How much? Since when?',
+      answer: 'Yes, three times , 2022',
+    },
+    {
+      question: 'Do you take a drugs?  How much? Since when? What kind?',
+      answer: 'Yes, three times , 2022',
+    },
+  ];
+
+  const mentalHealthData = [
+    {
+      question: 'Have you ever been diagnosed with a mental health condition?',
+      answer: 'Yes, anxiety disorder',
+    },
+    {
+      question: 'Are you currently receiving treatment?',
+      answer: 'Yes, attending therapy once a week',
+    },
+    {
+      question: 'Have you ever taken psychiatric medication?',
+      answer: 'Yes, fluoxetine',
+    },
+    {
+      question: 'Do you have a history of trauma?',
+      answer: 'Yes, childhood trauma',
+    },
+    {
+      question: 'Do you experience mood swings?',
+      answer: 'Occasionally',
+    },
+    {
+      question: 'Do you have thoughts of self-harm or suicide?',
+      answer: 'No',
+    },
+  ];
 
   return (
     <>
@@ -147,7 +218,10 @@ export default function TodayScheduleCard({
             )}
           </View>
 
-          <TouchableOpacity style={styles.intakeWrapper}>
+          <TouchableOpacity
+            style={styles.intakeWrapper}
+            onPress={() => setShowIntakeModal(true)}
+          >
             <Text style={styles.intakeLink}>Intake</Text>
           </TouchableOpacity>
         </View>
@@ -302,6 +376,97 @@ export default function TodayScheduleCard({
                 }
               />
             </View>
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        transparent
+        animationType="slide"
+        visible={showIntakeModal}
+        onRequestClose={() => setShowIntakeModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={styles.backdrop}
+            activeOpacity={1}
+            onPress={() => setShowIntakeModal(false)}
+          />
+          <View style={styles.intakeModal}>
+            <View style={styles.modalHandle} />
+            <TouchableOpacity
+              style={styles.modalCloseIcon}
+              onPress={() => setShowIntakeModal(false)}
+            >
+              <Ionicons name="close" size={22} color="#000" />
+            </TouchableOpacity>
+
+            <View style={styles.patientInfoRow}>
+              <Text style={styles.patientInfoLabel}>Patient info : </Text>
+              <Text style={styles.patientInfoName}>{name}</Text>
+            </View>
+
+            <TouchableOpacity
+              onPress={() =>
+                setExpandedSection(
+                  expandedSection === 'physical' ? null : 'physical',
+                )
+              }
+              style={styles.intakeSection}
+            >
+              <Text style={styles.intakeSectionText}>Physical Health</Text>
+              <Ionicons
+                name={
+                  expandedSection === 'physical' ? 'chevron-up' : 'chevron-down'
+                }
+                size={20}
+              />
+            </TouchableOpacity>
+
+            {expandedSection === 'physical' && (
+              <View style={styles.scrollWrapper}>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                  {physicalHealthData.map((item, index) => (
+                    <View key={index} style={styles.qaBlock}>
+                      <Text style={styles.questionText}>• {item.question}</Text>
+                      <View style={styles.answerBox}>
+                        <Text style={styles.answerText}>{item.answer}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
+            <TouchableOpacity
+              onPress={() =>
+                setExpandedSection(
+                  expandedSection === 'mental' ? null : 'mental',
+                )
+              }
+              style={styles.intakeSection}
+            >
+              <Text style={styles.intakeSectionText}>Mental Health</Text>
+              <Ionicons
+                name={
+                  expandedSection === 'mental' ? 'chevron-up' : 'chevron-down'
+                }
+                size={20}
+              />
+            </TouchableOpacity>
+            {expandedSection === 'mental' && (
+              <View style={styles.scrollWrapper}>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                  {mentalHealthData.map((item, index) => (
+                    <View key={index} style={styles.qaBlock}>
+                      <Text style={styles.questionText}>• {item.question}</Text>
+                      <View style={styles.answerBox}>
+                        <Text style={styles.answerText}>{item.answer}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
           </View>
         </View>
       </Modal>
@@ -554,5 +719,94 @@ const styles = StyleSheet.create({
     color: '#1D4ED8', // blue tone
     fontWeight: '600',
     fontSize: 10,
+  },
+  intakeModal: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    padding: 16,
+    height: '90%',
+  },
+
+  modalHandle: {
+    alignSelf: 'center',
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#ccc',
+    marginBottom: 12,
+  },
+
+  modalCloseIcon: {
+    position: 'absolute',
+    top: 12,
+    right: 16,
+    zIndex: 1,
+  },
+
+  intakeSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+
+  intakeSectionText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
+  scrollArea: {
+    maxHeight: 150,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+  },
+
+  patientInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+
+  patientInfoLabel: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#111',
+  },
+
+  patientInfoName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#3463E9', // blue
+  },
+  scrollWrapper: {
+    height: '70%',
+    paddingTop: 8,
+    marginBottom: 14,
+  },
+
+  qaBlock: {
+    marginBottom: 16,
+  },
+
+  questionText: {
+    fontSize: 14,
+    color: '#6B6B8D', // muted purple-ish
+    marginBottom: 6,
+  },
+
+  answerBox: {
+    backgroundColor: '#F3F3F3',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+
+  answerText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#000',
   },
 });
