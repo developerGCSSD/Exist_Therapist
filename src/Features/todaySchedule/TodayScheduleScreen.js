@@ -31,15 +31,14 @@ export default function TodaySchedule({ navigation }) {
   ];
 
   const [appointments, setAppointments] = useState([
-    // ✅ TODAY — 2025-07-29
     {
       id: 1,
       name: 'Ahmed Amir',
-      date: '2025-07-29',
+      date: '2025-08-04',
       status: 'New',
       method: 'online',
-      startTime: '09:15',
-      endTime: '10:00',
+      startTime: '21:05',
+      endTime: '22:00',
       noShow: false,
       sessionEnded: false,
       sessionEndedEarly: false,
@@ -47,11 +46,11 @@ export default function TodaySchedule({ navigation }) {
     {
       id: 2,
       name: 'Rania Adel',
-      date: '2025-07-29',
+      date: '2025-08-04',
       status: 'Follow-up',
       method: 'faceToFace',
-      startTime: '10:30',
-      endTime: '11:30',
+      startTime: '22:30',
+      endTime: '23:30',
       noShow: false,
       sessionEnded: false,
       sessionEndedEarly: false,
@@ -59,7 +58,7 @@ export default function TodaySchedule({ navigation }) {
     {
       id: 3,
       name: 'Samiha Ragab',
-      date: '2025-07-29',
+      date: '2025-08-04',
       status: 'New',
       method: 'faceToFace',
       startTime: '12:05',
@@ -71,7 +70,7 @@ export default function TodaySchedule({ navigation }) {
     {
       id: 4,
       name: 'Nada Yasser',
-      date: '2025-07-29',
+      date: '2025-08-04',
       status: 'New',
       method: 'online',
       startTime: '15:00',
@@ -83,7 +82,7 @@ export default function TodaySchedule({ navigation }) {
     {
       id: 5,
       name: 'Khaled Osama',
-      date: '2025-07-29',
+      date: '2025-08-04',
       status: 'Follow-up',
       method: 'online',
       startTime: '18:00',
@@ -92,12 +91,10 @@ export default function TodaySchedule({ navigation }) {
       sessionEnded: false,
       sessionEndedEarly: false,
     },
-
-    // ✅ TOMORROW — 2025-07-30
     {
       id: 6,
       name: 'Laila Ahmed',
-      date: '2025-07-30',
+      date: '2025-08-05',
       status: 'New',
       method: 'faceToFace',
       startTime: '10:00',
@@ -109,7 +106,7 @@ export default function TodaySchedule({ navigation }) {
     {
       id: 7,
       name: 'Ola Sherif',
-      date: '2025-07-30',
+      date: '2025-08-05',
       status: 'New',
       method: 'online',
       startTime: '12:00',
@@ -121,7 +118,7 @@ export default function TodaySchedule({ navigation }) {
     {
       id: 8,
       name: 'Ziad Kamal',
-      date: '2025-07-30',
+      date: '2025-08-05',
       status: 'Appointment Confirmed',
       method: 'faceToFace',
       startTime: '14:30',
@@ -133,7 +130,7 @@ export default function TodaySchedule({ navigation }) {
     {
       id: 9,
       name: 'Marwa Helmy',
-      date: '2025-07-30',
+      date: '2025-08-05',
       status: 'Follow-up',
       method: 'online',
       startTime: '17:00',
@@ -176,7 +173,6 @@ export default function TodaySchedule({ navigation }) {
     moment(a.startTime, 'HH:mm').diff(moment(b.startTime, 'HH:mm')),
   );
 
-  //normalized hourly timeline that starts at the earliest appointment hour
   const generateHourlyTimeline = () => {
     if (sortedAppointments.length === 0) return [];
 
@@ -189,7 +185,7 @@ export default function TodaySchedule({ navigation }) {
     const earliestStart = moment.min(appointmentTimes.map(a => a.start));
     const minStart = earliestStart.clone().startOf('hour');
     const latestStart = moment.max(appointmentTimes.map(a => a.start));
-    const maxEnd = latestStart.clone().endOf('hour'); // Only care about start times
+    const maxEnd = latestStart.clone().endOf('hour');
 
     const blocks = [];
     let cursor = minStart.clone();
@@ -249,8 +245,9 @@ export default function TodaySchedule({ navigation }) {
         <ScrollView contentContainerStyle={styles.cardsContainer}>
           {generateHourlyTimeline().map((item, index, arr) => {
             if (selectedTab === 'previous' && item.type === 'available') {
-              return null; // 👈 skip available time in "Previous" tab
+              return null;
             }
+
             const start = moment(item.startTime, 'HH:mm');
             const end = moment(item.endTime, 'HH:mm');
 
@@ -260,8 +257,8 @@ export default function TodaySchedule({ navigation }) {
                 style={{ flexDirection: 'row', alignItems: 'flex-start' }}
               >
                 <TimelineIndicator
-                  startTime={start.format('hh:00 A')} // always hour:00
-                  endTime={end.format('hh:00 A')} // always hour:00
+                  startTime={start.format('hh:00 A')}
+                  endTime={end.format('hh:00 A')}
                   isFirst={index === 0}
                   isLast={index === arr.length - 1}
                   isGap={item.type === 'available'}
