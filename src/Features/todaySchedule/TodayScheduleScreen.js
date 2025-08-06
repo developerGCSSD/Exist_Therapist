@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import WeeklyCalendar from '../../components/calendar';
@@ -8,21 +8,57 @@ import TodayScheduleCard from '../../components/todayScheduleCard';
 import TimelineIndicator from '../../components/timeLineIndecator';
 import AvailableTimeCard from '../../components/availableTimeCard';
 import moment from 'moment';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchTherapistSchedule } from '../todaySchedule/scheduleSlice';
+import { retrieveToken } from '../../storage/asyncStorage';
 
 const NAVBAR_HEIGHT = '14%';
 
 export default function TodaySchedule({ navigation }) {
   const [selectedTab, setSelectedTab] = useState('now');
   const [selectedDate, setSelectedDate] = useState(moment());
+  const [completedOnlineClientIds, setCompletedOnlineClientIds] = useState([]);
+  const [noShowClientIds, setNoShowClientIds] = useState([]);
+  const [endedEarlyClientIds, setEndedEarlyClientIds] = useState([]);
+  const [endedClientIds, setEndedClientIds] = useState([]);
+
+  console.log('🔍 Selected Date:', selectedDate.format('MM/DD/YYYY'));
+
+  const user = retrieveToken();
+  const profileId = useSelector(state => state.user.profileId);
+
+  const dispatch = useDispatch();
+  const therapistSchedule = useSelector(state => state.therapistSchedule);
+
+  const clientBookings = useSelector(
+    state => state.therapistSchedule?.clientBookings || [],
+  );
+
+  useEffect(() => {
+    console.log('🔍 Full therapistSchedule:', therapistSchedule);
+  }, [therapistSchedule]);
+
+  useEffect(() => {
+    if (selectedDate) {
+      dispatch(fetchTherapistSchedule(selectedDate));
+    }
+  }, [selectedDate]);
+
+  useEffect(() => {
+    console.log('Client Bookings:', clientBookings);
+  }, [clientBookings]);
 
   const handleDatePress = date => {
     if (date) {
-      console.log('Selected date:', date.format('YYYY-MM-DD'));
+      console.log('Selected date:', date.format('MM/DD/YYYY'));
       setSelectedDate(date);
     } else {
       console.log('Date cleared');
       setSelectedDate(moment());
     }
+  };
+  const markAsCompleted = clientId => {
+    setCompletedOnlineClientIds(prev => [...new Set([...prev, clientId])]);
   };
 
   const tabs = [
@@ -30,160 +66,66 @@ export default function TodaySchedule({ navigation }) {
     { label: 'Previous', value: 'previous' },
   ];
 
-  const [appointments, setAppointments] = useState([
-    {
-      id: 1,
-      name: 'Ahmed Amir',
-      date: '2025-08-04',
-      status: 'New',
-      method: 'online',
-      startTime: '21:05',
-      endTime: '22:00',
-      noShow: false,
-      sessionEnded: false,
-      sessionEndedEarly: false,
-    },
-    {
-      id: 2,
-      name: 'Rania Adel',
-      date: '2025-08-04',
-      status: 'Follow-up',
-      method: 'faceToFace',
-      startTime: '22:30',
-      endTime: '23:30',
-      noShow: false,
-      sessionEnded: false,
-      sessionEndedEarly: false,
-    },
-    {
-      id: 3,
-      name: 'Samiha Ragab',
-      date: '2025-08-04',
-      status: 'New',
-      method: 'faceToFace',
-      startTime: '12:05',
-      endTime: '12:45',
-      noShow: false,
-      sessionEnded: false,
-      sessionEndedEarly: false,
-    },
-    {
-      id: 4,
-      name: 'Nada Yasser',
-      date: '2025-08-04',
-      status: 'New',
-      method: 'online',
-      startTime: '15:00',
-      endTime: '15:30',
-      noShow: false,
-      sessionEnded: false,
-      sessionEndedEarly: false,
-    },
-    {
-      id: 5,
-      name: 'Khaled Osama',
-      date: '2025-08-04',
-      status: 'Follow-up',
-      method: 'online',
-      startTime: '18:00',
-      endTime: '18:45',
-      noShow: false,
-      sessionEnded: false,
-      sessionEndedEarly: false,
-    },
-    {
-      id: 6,
-      name: 'Laila Ahmed',
-      date: '2025-08-05',
-      status: 'New',
-      method: 'faceToFace',
-      startTime: '10:00',
-      endTime: '10:30',
-      noShow: false,
-      sessionEnded: false,
-      sessionEndedEarly: false,
-    },
-    {
-      id: 7,
-      name: 'Ola Sherif',
-      date: '2025-08-05',
-      status: 'New',
-      method: 'online',
-      startTime: '12:00',
-      endTime: '13:00',
-      noShow: false,
-      sessionEnded: false,
-      sessionEndedEarly: false,
-    },
-    {
-      id: 8,
-      name: 'Ziad Kamal',
-      date: '2025-08-05',
-      status: 'Appointment Confirmed',
-      method: 'faceToFace',
-      startTime: '14:30',
-      endTime: '15:30',
-      noShow: false,
-      sessionEnded: false,
-      sessionEndedEarly: false,
-    },
-    {
-      id: 9,
-      name: 'Marwa Helmy',
-      date: '2025-08-05',
-      status: 'Follow-up',
-      method: 'online',
-      startTime: '17:00',
-      endTime: '17:30',
-      noShow: false,
-      sessionEnded: false,
-      sessionEndedEarly: false,
-    },
-  ]);
+  const nowTime = moment();
 
-  const updateAppointmentState = (id, newState) => {
-    setAppointments(prev =>
-      prev.map(app => (app.id === id ? { ...app, ...newState } : app)),
+  const filteredAppointments = clientBookings.filter(app => {
+    const start = moment(
+      `${selectedDate.format('M/D/YYYY')} ${app.from}`,
+      'M/D/YYYY hh:mm A',
     );
-  };
 
-  const filteredAppointments = appointments.filter(app => {
-    const isSameDate = moment(app.date).isSame(selectedDate, 'day');
-    const now = moment();
-    const start = moment(`${app.date} ${app.startTime}`, 'YYYY-MM-DD HH:mm');
-    const end = moment(`${app.date} ${app.endTime}`, 'YYYY-MM-DD HH:mm');
+    const end = moment(
+      `${selectedDate.format('M/D/YYYY')} ${app.to}`,
+      'M/D/YYYY hh:mm A',
+    );
 
-    const isOnlineHistory =
-      app.method === 'online' &&
-      (app.noShow || app.sessionEnded || app.sessionEndedEarly);
+    const method = app.method?.toLowerCase();
+    const isCompletedOnline = completedOnlineClientIds.includes(app.clientId);
 
-    const isFaceToFaceHistory =
-      app.method === 'faceToFace' && end.isBefore(now);
+    const isPastDate = selectedDate.isBefore(moment(), 'day');
+    const isToday = selectedDate.isSame(moment(), 'day');
+    const isFutureDate = selectedDate.isAfter(moment(), 'day');
+    const hasEnded = end.isBefore(nowTime);
 
-    const isHistory = isOnlineHistory || isFaceToFaceHistory;
+    if (selectedTab === 'now') {
+      if (isToday) {
+        return !hasEnded && !isCompletedOnline;
+      } else if (isFutureDate) {
+        return !isCompletedOnline;
+      }
+      return false;
+    }
 
-    if (!isSameDate) return false;
-    if (selectedTab === 'previous') return isHistory;
-    if (selectedTab === 'now') return !isHistory;
+    if (selectedTab === 'previous') {
+      return (
+        isPastDate ||
+        (isToday && hasEnded) ||
+        noShowClientIds.includes(app.clientId) ||
+        endedClientIds.includes(app.clientId) ||
+        endedEarlyClientIds.includes(app.clientId) ||
+        completedOnlineClientIds.includes(app.clientId)
+      );
+    }
 
-    return true;
+    return false;
   });
 
   const sortedAppointments = [...filteredAppointments].sort((a, b) =>
-    moment(a.startTime, 'HH:mm').diff(moment(b.startTime, 'HH:mm')),
+    moment(a.from, 'hh:mm A').diff(moment(b.from, 'hh:mm A')),
   );
 
-  const generateHourlyTimeline = () => {
-    if (sortedAppointments.length === 0) return [];
+  const generateHourlyTimeline = appointments => {
+    if (appointments.length === 0) return [];
 
-    const appointmentTimes = sortedAppointments.map(app => ({
-      start: moment(app.startTime, 'HH:mm'),
-      end: moment(app.endTime, 'HH:mm'),
+    const appointmentTimes = appointments.map(app => ({
+      start: moment(app.from, 'hh:mm A'),
+      end: moment(app.to, 'hh:mm A'),
       original: app,
     }));
 
     const earliestStart = moment.min(appointmentTimes.map(a => a.start));
     const minStart = earliestStart.clone().startOf('hour');
+
     const latestStart = moment.max(appointmentTimes.map(a => a.start));
     const maxEnd = latestStart.clone().endOf('hour');
 
@@ -193,14 +135,14 @@ export default function TodaySchedule({ navigation }) {
       const nextHour = cursor.clone().add(1, 'hour');
 
       const match = appointmentTimes.find(
-        a => a.start.isSameOrAfter(cursor) && a.start.isBefore(nextHour),
+        a => a.start.isBefore(nextHour) && a.end.isAfter(cursor),
       );
 
       if (match) {
         blocks.push({
           type: 'appointment',
-          startTime: cursor.format('HH:mm'),
-          endTime: nextHour.format('HH:mm'),
+          startTime: cursor.format('hh:mm A'),
+          endTime: nextHour.format('hh:mm A'),
           data: match.original,
         });
       } else {
@@ -236,6 +178,17 @@ export default function TodaySchedule({ navigation }) {
       <View style={styles.contentContainer}>
         <WeeklyCalendar onDatePress={handleDatePress} />
 
+        <Text
+          style={{
+            color: '#5AA5EE',
+            fontSize: 10,
+            textAlign: 'center',
+            marginVertical: 8,
+          }}
+        >
+          Therapist ID: {profileId}
+        </Text>
+
         <SegmentedTabs
           tabs={tabs}
           selected={selectedTab}
@@ -243,65 +196,120 @@ export default function TodaySchedule({ navigation }) {
         />
 
         <ScrollView contentContainerStyle={styles.cardsContainer}>
-          {generateHourlyTimeline().map((item, index, arr) => {
-            if (selectedTab === 'previous' && item.type === 'available') {
-              return null;
-            }
+          {sortedAppointments.length === 0 ? (
+            <Text
+              style={{
+                color: '#6C6C89',
+                textAlign: 'center',
+                marginTop: 20,
+                fontStyle: 'italic',
+              }}
+            >
+              {selectedTab === 'now'
+                ? 'No sessions available right now.'
+                : 'No previous sessions to show.'}
+            </Text>
+          ) : (
+            generateHourlyTimeline(sortedAppointments).map(
+              (item, index, arr) => {
+                if (selectedTab === 'previous' && item.type === 'available') {
+                  return null;
+                }
 
-            const start = moment(item.startTime, 'HH:mm');
-            const end = moment(item.endTime, 'HH:mm');
+                const start = moment(item.startTime, 'HH:mm');
+                const end = moment(item.endTime, 'HH:mm');
 
-            return (
-              <View
-                key={index}
-                style={{ flexDirection: 'row', alignItems: 'flex-start' }}
-              >
-                <TimelineIndicator
-                  startTime={start.format('hh:00 A')}
-                  endTime={end.format('hh:00 A')}
-                  isFirst={index === 0}
-                  isLast={index === arr.length - 1}
-                  isGap={item.type === 'available'}
-                />
-
-                <View style={{ flex: 1 }}>
-                  {item.type === 'appointment' ? (
-                    <TodayScheduleCard
-                      {...item.data}
-                      disableActions={
-                        !moment(item.data.date).isSame(moment(), 'day')
-                      }
-                      waitingForOnlineStart={
-                        item.data.method === 'online' &&
-                        moment(
-                          item.data.date + ' ' + item.data.startTime,
-                        ).isAfter(moment())
-                      }
-                      onStart={() => console.log('Started', item.data.name)}
-                      onNoShow={() =>
-                        updateAppointmentState(item.data.id, { noShow: true })
-                      }
-                      onEndSession={() =>
-                        updateAppointmentState(item.data.id, {
-                          sessionEnded: true,
-                        })
-                      }
-                      onEndEarly={() =>
-                        updateAppointmentState(item.data.id, {
-                          sessionEndedEarly: true,
-                        })
-                      }
+                return (
+                  <View
+                    key={index}
+                    style={{ flexDirection: 'row', alignItems: 'flex-start' }}
+                  >
+                    <TimelineIndicator
+                      startTime={start.format('hh:00 A')}
+                      endTime={end.format('hh:00 A')}
+                      isFirst={index === 0}
+                      isLast={index === arr.length - 1}
+                      isGap={item.type === 'available'}
                     />
-                  ) : (
-                    <AvailableTimeCard
-                      startTime={start.format('hh:mm A')}
-                      endTime={end.format('hh:mm A')}
-                    />
-                  )}
-                </View>
-              </View>
-            );
-          })}
+
+                    <View style={{ flex: 1 }}>
+                      {item.type === 'appointment' ? (
+                        <>
+                          {console.log(
+                            '🧪 Rendering appointment:',
+                            item.data.clientName,
+                            item.data.method,
+                          )}
+                          <TodayScheduleCard
+                            id={item.data.clientId}
+                            reservationStatus={item.data.reservationStatus}
+                            showReservationStatus={selectedTab === 'previous'}
+                            name={item.data.clientName}
+                            method={item.data.method}
+                            startTime={item.data.from}
+                            endTime={item.data.to}
+                            status={item.data.sessionType}
+                            currentArea={item.data.currentArea}
+                            disableActions={
+                              !moment(
+                                therapistSchedule.date,
+                                'M/D/YYYY',
+                              ).isSame(moment(), 'day')
+                            }
+                            waitingForOnlineStart={
+                              item.data.method?.toLowerCase() === 'online' &&
+                              moment(
+                                `${therapistSchedule.date} ${item.data.from}`,
+                                'M/D/YYYY hh:mm A',
+                              ).isAfter(moment())
+                            }
+                            noShow={noShowClientIds.includes(
+                              item.data.clientId,
+                            )}
+                            sessionEnded={endedClientIds.includes(
+                              item.data.clientId,
+                            )}
+                            sessionEndedEarly={endedEarlyClientIds.includes(
+                              item.data.clientId,
+                            )}
+                            onStart={() =>
+                              console.log('Started', item.data.clientName)
+                            }
+                            onNoShow={() => {
+                              setNoShowClientIds(prev => [
+                                ...new Set([...prev, item.data.clientId]),
+                              ]);
+                            }}
+                            onEndSession={() => {
+                              setEndedClientIds(prev => [
+                                ...new Set([...prev, item.data.clientId]),
+                              ]);
+                              if (item.data.method.toLowerCase() === 'online') {
+                                markAsCompleted(item.data.clientId);
+                              }
+                            }}
+                            onEndEarly={duration => {
+                              setEndedEarlyClientIds(prev => [
+                                ...new Set([...prev, item.data.clientId]),
+                              ]);
+                              if (item.data.method.toLowerCase() === 'online') {
+                                markAsCompleted(item.data.clientId);
+                              }
+                            }}
+                          />
+                        </>
+                      ) : (
+                        <AvailableTimeCard
+                          startTime={start.format('hh:mm A')}
+                          endTime={end.format('hh:mm A')}
+                        />
+                      )}
+                    </View>
+                  </View>
+                );
+              },
+            )
+          )}
         </ScrollView>
       </View>
     </LinearGradient>

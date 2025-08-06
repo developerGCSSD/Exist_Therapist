@@ -13,11 +13,14 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import OnlineMethodIcon from '../assets/icons/onlineMethod';
 import FaceToFaceMethodIcon from '../assets/icons/faceToFaceMethod';
 import InputField from './inputField';
+import { useDispatch } from 'react-redux';
+import { updateClientSessionState } from '../Features/todaySchedule/clientSessionStateSlice';
+
 export default function TodayScheduleCard({
   id,
-  name = 'Ali Mohamed Ali',
-  status = 'New',
-  method = 'online',
+  name,
+  status,
+  method,
   noShow,
   sessionEnded,
   sessionEndedEarly,
@@ -25,8 +28,10 @@ export default function TodayScheduleCard({
   onNoShow,
   onEndSession,
   onEndEarly,
-  disableActions = false,
+  disableActions,
   waitingForOnlineStart,
+  reservationStatus,
+  showReservationStatus,
 }) {
   const [started, setStarted] = useState(false);
   const [showEndSessionModal, setShowEndSessionModal] = useState(false);
@@ -35,6 +40,7 @@ export default function TodayScheduleCard({
   const [duration, setDuration] = useState('');
   const [showIntakeModal, setShowIntakeModal] = useState(false);
   const [expandedSection, setExpandedSection] = useState(null); // 'physical' | 'mental' | null
+  const dispatch = useDispatch();
 
   const handleStart = () => {
     setStarted(true);
@@ -49,7 +55,17 @@ export default function TodayScheduleCard({
   const confirmEndSession = () => {
     setStarted(false);
     setShowEndSessionModal(false);
-    onEndSession?.(); // 🔁 Call parent to update the state
+    onEndSession?.();
+
+    if (method?.toLowerCase() === 'online') {
+      dispatch(
+        updateClientSessionState({
+          clientId: id,
+          state: 'Session Completed',
+          date: moment().format('MM/DD/YYYY'),
+        }),
+      );
+    }
   };
 
   const handleEndEarly = () => {
@@ -60,6 +76,60 @@ export default function TodayScheduleCard({
   const handleNoShow = () => {
     setModalType('noShow');
     setShowEndSessionModal(true);
+  };
+
+  const getReservationStatusStyle = (status, method) => {
+    const faceToFaceStatuses = {
+      'Pending Confirmation': {
+        badgeStyle: styles.endedEarlyBadge,
+        textStyle: styles.endedEarlyText,
+      },
+      'Checked Out': {
+        badgeStyle: styles.noShowBadge,
+        textStyle: styles.noShowText,
+      },
+      defaultCompleted: [
+        'Arrival Confirmed',
+        'Appointment Confirmed',
+        'Availability Confirmed',
+        'Check-In Confirmed',
+      ],
+    };
+
+    const onlineStatuses = {
+      'Pending No Show': {
+        badgeStyle: styles.noShowBadge,
+        textStyle: styles.noShowText,
+      },
+      'Pending Not Completed': {
+        badgeStyle: styles.endedEarlyBadge,
+        textStyle: styles.endedEarlyText,
+      },
+      OnlineFollowUp: {
+        badgeStyle: styles.completedBadge,
+        textStyle: styles.completedText,
+      },
+    };
+
+    if (method?.toLowerCase() === 'face to face') {
+      if (faceToFaceStatuses[status]) {
+        return faceToFaceStatuses[status];
+      } else if (faceToFaceStatuses.defaultCompleted.includes(status)) {
+        return {
+          badgeStyle: styles.completedBadge,
+          textStyle: styles.completedText,
+        };
+      }
+    } else if (method?.toLowerCase() === 'online') {
+      if (onlineStatuses[status]) {
+        return onlineStatuses[status];
+      }
+    }
+
+    return {
+      badgeStyle: styles.reservationStatusBadge,
+      textStyle: styles.reservationStatusText,
+    };
   };
 
   const physicalHealthData = [
@@ -130,7 +200,7 @@ export default function TodayScheduleCard({
         <View style={styles.headerRow}>
           <View style={styles.infoContainer}>
             <Text style={styles.name}>{name}</Text>
-            {status === 'New' && (
+            {status === 'First' && (
               <>
                 <Text style={styles.dot}>•</Text>
                 <Text style={styles.status}>New</Text>
@@ -140,7 +210,7 @@ export default function TodayScheduleCard({
 
           <View style={styles.iconContainer}>
             <View style={styles.svgIconWrapper}>
-              {method === 'faceToFace' ? (
+              {method === 'Face To Face' ? (
                 <FaceToFaceMethodIcon width={24} height={24} />
               ) : (
                 <OnlineMethodIcon width={24} height={24} />
@@ -155,15 +225,25 @@ export default function TodayScheduleCard({
 
         <View style={styles.actionsRow}>
           <View style={styles.buttonsContainer}>
-            {waitingForOnlineStart ? (
+            {showReservationStatus ? (
+              (() => {
+                const { badgeStyle, textStyle } = getReservationStatusStyle(
+                  reservationStatus,
+                  method,
+                );
+                return (
+                  <View style={badgeStyle}>
+                    <Text style={textStyle}>{reservationStatus}</Text>
+                  </View>
+                );
+              })()
+            ) : waitingForOnlineStart ? (
               <View style={styles.waitingBadge}>
-                <Text style={styles.waitingText}>
-                  Waiting for the session start time
-                </Text>
+                <Text style={styles.waitingText}>{reservationStatus}</Text>
               </View>
             ) : disableActions ? (
               <View style={styles.notAvailableBadge}>
-                <Text style={styles.notAvailableText}>Not Available Now</Text>
+                <Text style={styles.notAvailableText}>{reservationStatus}</Text>
               </View>
             ) : method === 'faceToFace' ? (
               <View style={styles.confirmedBadge}>
@@ -181,40 +261,54 @@ export default function TodayScheduleCard({
               <View style={styles.completedBadge}>
                 <Text style={styles.completedText}>Session Completed</Text>
               </View>
-            ) : started ? (
-              <>
-                <PrimaryButton
-                  title="End Session"
-                  onPress={handleEndSession}
-                  width="48%"
-                  height={40}
-                  fontSize={14}
-                />
-                <SecondaryButton
-                  title="End Early"
-                  onPress={handleEndEarly}
-                  width="48%"
-                  height={40}
-                  fontSize={14}
-                />
-              </>
+            ) : method?.toLowerCase() === 'online' ? (
+              started ? (
+                <>
+                  <PrimaryButton
+                    title="End Session"
+                    onPress={handleEndSession}
+                    width="48%"
+                    height={40}
+                    fontSize={14}
+                  />
+                  <SecondaryButton
+                    title="End Early"
+                    onPress={handleEndEarly}
+                    width="48%"
+                    height={40}
+                    fontSize={14}
+                  />
+                </>
+              ) : (
+                <>
+                  <PrimaryButton
+                    title="Start"
+                    onPress={handleStart}
+                    width="48%"
+                    height={35}
+                    fontSize={14}
+                  />
+                  <SecondaryButton
+                    title="No show"
+                    onPress={handleNoShow}
+                    width="48%"
+                    height={35}
+                    fontSize={14}
+                  />
+                </>
+              )
             ) : (
-              <>
-                <PrimaryButton
-                  title="Start"
-                  onPress={handleStart}
-                  width="48%"
-                  height={35}
-                  fontSize={14}
-                />
-                <SecondaryButton
-                  title="No show"
-                  onPress={handleNoShow}
-                  width="48%"
-                  height={35}
-                  fontSize={14}
-                />
-              </>
+              (() => {
+                const { badgeStyle, textStyle } = getReservationStatusStyle(
+                  reservationStatus,
+                  method,
+                );
+                return (
+                  <View style={badgeStyle}>
+                    <Text style={textStyle}>{reservationStatus}</Text>
+                  </View>
+                );
+              })()
             )}
           </View>
 
@@ -300,6 +394,15 @@ export default function TodayScheduleCard({
                         setShowEndSessionModal(false);
                         setStarted(false);
                         onNoShow?.();
+                        if (method?.toLowerCase() === 'online') {
+                          dispatch(
+                            updateClientSessionState({
+                              clientId: id,
+                              state: 'No show',
+                              date: moment().format('MM/DD/YYYY'),
+                            }),
+                          );
+                        }
                       }
                     : modalType === 'early'
                     ? () => {
@@ -368,6 +471,17 @@ export default function TodayScheduleCard({
                   setStarted(false);
                   setShowDurationModal(false);
                   onEndEarly?.(parseInt(duration, 10));
+
+                  if (method?.toLowerCase() === 'online') {
+                    dispatch(
+                      updateClientSessionState({
+                        clientId: id,
+                        state: 'Session Ended Early',
+                        date: moment().format('MM/DD/YYYY'),
+                        RemainingTime: parseInt(duration, 10),
+                      }),
+                    );
+                  }
                 }}
                 width="100%"
                 height={42}
@@ -695,7 +809,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   notAvailableBadge: {
-    backgroundColor: '#F3F4F6', // light grey
+    backgroundColor: '#EAF4FF', // light grey
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
@@ -703,7 +817,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   notAvailableText: {
-    color: '#6B7280', // muted text
+    color: '#1D4ED8', // muted text
     fontWeight: '600',
     fontSize: 10,
   },
