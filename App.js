@@ -25,6 +25,9 @@ import ScheduleRequestScreen from './src/Features/scheduleUpcomingSession/schedu
 import TransferRequestScreen from './src/Features/transfer/transfer';
 import CancelRequestScreen from './src/Features/cancelRequest/cancelReauest';
 
+import DayOffRequestScreen from './src/Features/dayOffRequest/dayOff';
+import PeriodOffRequestScreen from './src/Features/periodOffRequest/periodOff';
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -35,6 +38,15 @@ function BottomTabs() {
         headerShown: false,
         tabBarActiveTintColor: '#3463E9',
         tabBarInactiveTintColor: '#8A8AA3',
+        tabBarStyle: {
+          backgroundColor: '#fff',
+          borderTopWidth: 0, // remove default border
+          elevation: 8, // Android shadow
+          shadowColor: '#000', // iOS shadow
+          shadowOpacity: 0.2,
+          shadowRadius: 5,
+          shadowOffset: { width: 0, height: -2 },
+        },
         tabBarIcon: ({ focused }) => {
           const iconColor = focused ? '#3463E9' : '#8A8AA3';
 
@@ -82,6 +94,11 @@ function RootNavigator() {
       />
       <Stack.Screen name="Transfer" component={TransferRequestScreen} />
       <Stack.Screen name="Cancel Request" component={CancelRequestScreen} />
+      <Stack.Screen name="Day Off Request" component={DayOffRequestScreen} />
+      <Stack.Screen
+        name="Period Off Request"
+        component={PeriodOffRequestScreen}
+      />
     </Stack.Navigator>
   );
 }

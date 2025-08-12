@@ -3,9 +3,9 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const RequestBox = ({ options, selected, onSelect }) => {
+const RequestBox = ({ options, selected, onSelect, horizontal = false }) => {
   return (
-    <View>
+    <View style={[horizontal && styles.rowWrap]}>
       {options.map((item, index) => {
         const isSelected = selected === item.value;
         return (
@@ -15,13 +15,14 @@ const RequestBox = ({ options, selected, onSelect }) => {
             style={[
               styles.optionContainer,
               isSelected && styles.selectedOption,
-              index === 0 && { marginTop: 0 },
+              horizontal && styles.horizontalOption,
+              !horizontal && index === 0 && { marginTop: 0 },
             ]}
           >
             <Ionicons
               name={isSelected ? 'radio-button-on' : 'radio-button-off'}
               size={20}
-              color={isSelected ? '#2563EB' : '#6B7280'} // Blue when selected, gray otherwise
+              color={isSelected ? '#2563EB' : '#6B7280'}
               style={styles.radioIcon}
             />
             <Text
@@ -69,5 +70,15 @@ const styles = StyleSheet.create({
   selectedText: {
     fontWeight: '500',
     color: '#2563EB',
+  },
+  rowWrap: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  horizontalOption: {
+    flex: 1,
+    marginVertical: 0,
   },
 });
