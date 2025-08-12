@@ -13,8 +13,11 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import OnlineMethodIcon from '../assets/icons/onlineMethod';
 import FaceToFaceMethodIcon from '../assets/icons/faceToFaceMethod';
 import InputField from './inputField';
+import RequestBox from './requestBox';
 import { useDispatch } from 'react-redux';
 import { updateClientSessionState } from '../Features/todaySchedule/clientSessionStateSlice';
+import { useNavigation } from '@react-navigation/native';
+import moment from 'moment';
 
 export default function TodayScheduleCard({
   id,
@@ -32,6 +35,8 @@ export default function TodayScheduleCard({
   waitingForOnlineStart,
   reservationStatus,
   showReservationStatus,
+  currentArea,
+  therapistName,
 }) {
   const [started, setStarted] = useState(false);
   const [showEndSessionModal, setShowEndSessionModal] = useState(false);
@@ -40,7 +45,11 @@ export default function TodayScheduleCard({
   const [duration, setDuration] = useState('');
   const [showIntakeModal, setShowIntakeModal] = useState(false);
   const [expandedSection, setExpandedSection] = useState(null); // 'physical' | 'mental' | null
+  const [showOptionsModal, setShowOptionsModal] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+
   const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   const handleStart = () => {
     setStarted(true);
@@ -79,6 +88,13 @@ export default function TodayScheduleCard({
   };
 
   const getReservationStatusStyle = (status, method) => {
+    // Common completed statuses for both methods
+    const universalCompletedStatuses = [
+      'Appointment Confirmed',
+      'Availability Confirmed',
+    ];
+
+    // Specific styles for other known statuses
     const faceToFaceStatuses = {
       'Pending Confirmation': {
         badgeStyle: styles.endedEarlyBadge,
@@ -88,12 +104,6 @@ export default function TodayScheduleCard({
         badgeStyle: styles.noShowBadge,
         textStyle: styles.noShowText,
       },
-      defaultCompleted: [
-        'Arrival Confirmed',
-        'Appointment Confirmed',
-        'Availability Confirmed',
-        'Check-In Confirmed',
-      ],
     };
 
     const onlineStatuses = {
@@ -111,14 +121,18 @@ export default function TodayScheduleCard({
       },
     };
 
+    // ✅ If status is universally considered completed
+    if (universalCompletedStatuses.includes(status)) {
+      return {
+        badgeStyle: styles.completedBadge,
+        textStyle: styles.completedText,
+      };
+    }
+
+    // Check method-specific overrides
     if (method?.toLowerCase() === 'face to face') {
       if (faceToFaceStatuses[status]) {
         return faceToFaceStatuses[status];
-      } else if (faceToFaceStatuses.defaultCompleted.includes(status)) {
-        return {
-          badgeStyle: styles.completedBadge,
-          textStyle: styles.completedText,
-        };
       }
     } else if (method?.toLowerCase() === 'online') {
       if (onlineStatuses[status]) {
@@ -126,11 +140,20 @@ export default function TodayScheduleCard({
       }
     }
 
+    // Default fallback
     return {
       badgeStyle: styles.reservationStatusBadge,
       textStyle: styles.reservationStatusText,
     };
   };
+
+  const requestOptions = [
+    { label: 'Schedule Upcoming Sessions', value: 'schedule' },
+    { label: 'Transfer', value: 'transfer' },
+    { label: 'Change Session Method', value: 'change_method' },
+    { label: 'Reschedule', value: 'reschedule' },
+    { label: 'Cancel', value: 'cancel' },
+  ];
 
   const physicalHealthData = [
     {
@@ -217,7 +240,7 @@ export default function TodayScheduleCard({
               )}
             </View>
 
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => setShowOptionsModal(true)}>
               <Ionicons name="ellipsis-vertical" size={18} color="#000" />
             </TouchableOpacity>
           </View>
@@ -321,7 +344,7 @@ export default function TodayScheduleCard({
         </View>
       </View>
 
-      {/* Modal */}
+      {/* Actions Modal */}
       <Modal
         transparent
         animationType="slide"
@@ -420,6 +443,8 @@ export default function TodayScheduleCard({
           </View>
         </View>
       </Modal>
+
+      {/* Duration Modal */}
       <Modal
         transparent
         animationType="slide"
@@ -493,6 +518,8 @@ export default function TodayScheduleCard({
           </View>
         </View>
       </Modal>
+
+      {/* Intake Modal */}
       <Modal
         transparent
         animationType="slide"
@@ -581,6 +608,83 @@ export default function TodayScheduleCard({
                 </ScrollView>
               </View>
             )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Options Modal */}
+      <Modal
+        transparent
+        animationType="slide"
+        visible={showOptionsModal}
+        onRequestClose={() => setShowOptionsModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={styles.backdrop}
+            activeOpacity={1}
+            onPress={() => setShowOptionsModal(false)}
+          />
+          <View style={styles.bottomSheetModal}>
+            <View style={styles.modalHandle} />
+            <View style={styles.bottomSheetHeader}>
+              <Text style={styles.bottomSheetTitle}>Add request</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowOptionsModal(false);
+                  setSelectedRequest(null);
+                }}
+              >
+                <Ionicons name="close" size={24} color="#000" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView contentContainerStyle={{ paddingHorizontal: 16 }}>
+              <RequestBox
+                options={requestOptions}
+                selected={selectedRequest}
+                onSelect={setSelectedRequest}
+              />
+            </ScrollView>
+
+            <View style={{ padding: 16 }}>
+              <PrimaryButton
+                title="Next"
+                onPress={() => {
+                  setShowOptionsModal(false);
+                  const params = {
+                    clientId: id,
+                    clientName: name,
+                    currentArea,
+                    therapistName,
+                    method,
+                  };
+                  switch (selectedRequest) {
+                    case 'schedule':
+                      navigation.navigate('Schedule Upcoming', params);
+                      break;
+                    case 'transfer':
+                      navigation.navigate('Transfer', params);
+                      break;
+                    case 'change_method':
+                      navigation.navigate('Change Method', params);
+                      break;
+                    case 'reschedule':
+                      navigation.navigate('Reschedule', params);
+                      break;
+                    case 'cancel':
+                      navigation.navigate('Cancel Request', params);
+                      break;
+                    default:
+                      break;
+                  }
+                  setSelectedRequest(null);
+                }}
+                disabled={!selectedRequest}
+                width="100%"
+                height={44}
+              />
+            </View>
           </View>
         </View>
       </Modal>
@@ -921,6 +1025,32 @@ const styles = StyleSheet.create({
   answerText: {
     fontSize: 14,
     fontWeight: '600',
+    color: '#000',
+  },
+
+  bottomSheetModal: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '60%',
+    paddingTop: 12,
+    paddingBottom: 20,
+  },
+
+  bottomSheetHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    marginBottom: 12,
+  },
+
+  bottomSheetTitle: {
+    fontSize: 18,
+    fontWeight: '700',
     color: '#000',
   },
 });

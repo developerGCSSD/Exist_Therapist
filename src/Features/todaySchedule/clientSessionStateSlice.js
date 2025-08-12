@@ -6,15 +6,45 @@ export const updateClientSessionState = createAsyncThunk(
   'clientSessionState/update',
   async ({ clientId, state, RemainingTime, date }, thunkAPI) => {
     try {
-      await api.post(endPoints.ClientSessionState, {
+      const payload = {
         clientId,
         state,
-        RemainingTime,
         date,
-      });
-      return true; // just return success indicator
+        RemainingTime,
+      };
+
+      console.log('yyyyyyyyyy', payload);
+      console.log('📤 Sending updateClientSessionState request');
+      console.log('📦 Payload:', JSON.stringify(payload, null, 2));
+      console.log(
+        '🔗 Full URL:',
+        api.defaults.baseURL + endPoints.ClientSessionState,
+      );
+
+      const response = await api.put(endPoints.ClientSessionState, payload);
+
+      console.log('✅ Success Response:', response.status, response.data);
+      return true;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response?.data || 'Unknown error');
+      if (error.response) {
+        // Server responded with a non-2xx status code
+        console.error('❌ Server Error:', {
+          status: error.response.status,
+          data: error.response.data,
+        });
+        return thunkAPI.rejectWithValue(
+          error.response.data?.message ||
+            `Server error: ${error.response.status}`,
+        );
+      } else if (error.request) {
+        // Request was made but no response received
+        console.error('❌ No Response Received:', error.request);
+        return thunkAPI.rejectWithValue('No response from server.');
+      } else {
+        // Something else happened
+        console.error('❌ Error in Request Setup:', error.message);
+        return thunkAPI.rejectWithValue(error.message || 'Request setup error');
+      }
     }
   },
 );

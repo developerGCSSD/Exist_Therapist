@@ -22,10 +22,14 @@ export default function TodaySchedule({ navigation }) {
   const [endedEarlyClientIds, setEndedEarlyClientIds] = useState([]);
   const [endedClientIds, setEndedClientIds] = useState([]);
 
-  console.log('🔍 Selected Date:', selectedDate.format('MM/DD/YYYY'));
+  // console.log('🔍 Selected Date:', selectedDate.format('MM/DD/YYYY'));
 
-  const user = retrieveToken();
   const profileId = useSelector(state => state.user.profileId);
+
+  const therapistName = useSelector(
+    state => state.therapistSchedule.therapistName,
+  );
+  // console.log('🔍 Therapist Name:', therapistName);
 
   const dispatch = useDispatch();
   const therapistSchedule = useSelector(state => state.therapistSchedule);
@@ -35,7 +39,7 @@ export default function TodaySchedule({ navigation }) {
   );
 
   useEffect(() => {
-    console.log('🔍 Full therapistSchedule:', therapistSchedule);
+    // console.log('🔍 Full therapistSchedule:', therapistSchedule);
   }, [therapistSchedule]);
 
   useEffect(() => {
@@ -45,15 +49,15 @@ export default function TodaySchedule({ navigation }) {
   }, [selectedDate]);
 
   useEffect(() => {
-    console.log('Client Bookings:', clientBookings);
+    // console.log('Client Bookings:', clientBookings);
   }, [clientBookings]);
 
   const handleDatePress = date => {
     if (date) {
-      console.log('Selected date:', date.format('MM/DD/YYYY'));
+      // console.log('Selected date:', date.format('MM/DD/YYYY'));
       setSelectedDate(date);
     } else {
-      console.log('Date cleared');
+      // console.log('Date cleared');
       setSelectedDate(moment());
     }
   };
@@ -178,7 +182,7 @@ export default function TodaySchedule({ navigation }) {
       <View style={styles.contentContainer}>
         <WeeklyCalendar onDatePress={handleDatePress} />
 
-        <Text
+        {/* <Text
           style={{
             color: '#5AA5EE',
             fontSize: 10,
@@ -187,7 +191,7 @@ export default function TodaySchedule({ navigation }) {
           }}
         >
           Therapist ID: {profileId}
-        </Text>
+        </Text> */}
 
         <SegmentedTabs
           tabs={tabs}
@@ -235,12 +239,13 @@ export default function TodaySchedule({ navigation }) {
                     <View style={{ flex: 1 }}>
                       {item.type === 'appointment' ? (
                         <>
-                          {console.log(
+                          {/* {console.log(
                             '🧪 Rendering appointment:',
                             item.data.clientName,
                             item.data.method,
-                          )}
+                          )} */}
                           <TodayScheduleCard
+                            therapistName={therapistName}
                             id={item.data.clientId}
                             reservationStatus={item.data.reservationStatus}
                             showReservationStatus={selectedTab === 'previous'}
