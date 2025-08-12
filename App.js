@@ -19,6 +19,12 @@ import Calendar from './src/assets/icons/calendar';
 import DashBoardAndTodo from './src/assets/icons/dashbord&todo';
 import MyRequest from './src/assets/icons/myRequest';
 
+import ChangeMethodRequestScreen from './src/Features/changeSessionMethod/changeSessionethod';
+import RescheduleRequestScreen from './src/Features/reschedule/reschedule';
+import ScheduleRequestScreen from './src/Features/scheduleUpcomingSession/scheduleUpcoming';
+import TransferRequestScreen from './src/Features/transfer/transfer';
+import CancelRequestScreen from './src/Features/cancelRequest/cancelReauest';
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -65,6 +71,17 @@ function RootNavigator() {
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Home" component={BottomTabs} />
+      <Stack.Screen
+        name="Change Method"
+        component={ChangeMethodRequestScreen}
+      />
+      <Stack.Screen name="Reschedule" component={RescheduleRequestScreen} />
+      <Stack.Screen
+        name="Schedule Upcoming"
+        component={ScheduleRequestScreen}
+      />
+      <Stack.Screen name="Transfer" component={TransferRequestScreen} />
+      <Stack.Screen name="Cancel Request" component={CancelRequestScreen} />
     </Stack.Navigator>
   );
 }
