@@ -6,8 +6,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function TopNavBar({
   title,
+  showHamburger = false,
   showBack = false,
   showBell = false,
+  onHamburgerPress,
   onBackPress,
   onBellPress,
 }) {
@@ -20,30 +22,44 @@ export default function TopNavBar({
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <View style={styles.container}>
           <View style={styles.innerContainer}>
-            {/* Back icon */}
-            {showBack && (
-              <TouchableOpacity onPress={onBackPress} style={styles.iconButton}>
-                <Ionicons name="arrow-back" size={24} color="#fff" />
-              </TouchableOpacity>
-            )}
+            {/* Left icons */}
+            <View style={styles.sideContainer}>
+              {showHamburger && (
+                <TouchableOpacity
+                  onPress={onHamburgerPress}
+                  style={styles.iconButton}
+                >
+                  <Ionicons name="menu" size={24} color="#fff" />
+                </TouchableOpacity>
+              )}
+              {showBack && (
+                <TouchableOpacity
+                  onPress={onBackPress}
+                  style={styles.iconButton}
+                >
+                  <Ionicons name="arrow-back" size={24} color="#fff" />
+                </TouchableOpacity>
+              )}
+            </View>
 
             {/* Title */}
-            <Text
-              style={[
-                styles.title,
-                !showBack && !showBell && styles.titleCentered,
-              ]}
-              numberOfLines={1}
-            >
-              {title}
-            </Text>
+            <View style={styles.titleContainer}>
+              <Text style={styles.title} numberOfLines={1}>
+                {title}
+              </Text>
+            </View>
 
-            {/* Bell icon */}
-            {showBell && (
-              <TouchableOpacity onPress={onBellPress} style={styles.iconButton}>
-                <Ionicons name="notifications" size={24} color="#fff" />
-              </TouchableOpacity>
-            )}
+            {/* Right icons */}
+            <View style={styles.sideContainer}>
+              {showBell && (
+                <TouchableOpacity
+                  onPress={onBellPress}
+                  style={styles.iconButton}
+                >
+                  <Ionicons name="notifications" size={24} color="#fff" />
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
         </View>
       </SafeAreaView>
@@ -52,26 +68,33 @@ export default function TopNavBar({
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    backgroundColor: 'transparent',
+  },
   container: {
     height: 65,
     justifyContent: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 8,
   },
   innerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sideContainer: {
+    width: 60, // fixed width so title can truly be centered
     flexDirection: 'row',
     alignItems: 'center',
   },
   iconButton: {
     padding: 4,
   },
-  title: {
+  titleContainer: {
     flex: 1,
+    alignItems: 'center',
+  },
+  title: {
     fontSize: 22,
     fontWeight: '600',
     color: '#fff',
-    marginHorizontal: 8,
-  },
-  titleCentered: {
-    // textAlign: 'center',
   },
 });
