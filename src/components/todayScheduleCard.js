@@ -37,6 +37,7 @@ export default function TodayScheduleCard({
   showReservationStatus,
   currentArea,
   therapistName,
+  date,
 }) {
   const [started, setStarted] = useState(false);
   const [showEndSessionModal, setShowEndSessionModal] = useState(false);
@@ -658,6 +659,7 @@ export default function TodayScheduleCard({
                     currentArea,
                     therapistName,
                     method,
+                    date,
                   };
                   switch (selectedRequest) {
                     case 'schedule':

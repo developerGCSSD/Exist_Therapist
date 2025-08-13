@@ -49,7 +49,7 @@ export default function TodaySchedule({ navigation }) {
   }, [selectedDate]);
 
   useEffect(() => {
-    // console.log('Client Bookings:', clientBookings);
+    console.log('Client Bookings:', clientBookings);
   }, [clientBookings]);
 
   const handleDatePress = date => {
@@ -176,6 +176,7 @@ export default function TodaySchedule({ navigation }) {
           showBack={false}
           showBell={true}
           onBellPress={() => console.log('Notifications')}
+          showHamburger={true}
         />
       </View>
 
@@ -245,6 +246,7 @@ export default function TodaySchedule({ navigation }) {
                             item.data.method,
                           )} */}
                           <TodayScheduleCard
+                            date={selectedDate}
                             therapistName={therapistName}
                             id={item.data.clientId}
                             reservationStatus={item.data.reservationStatus}
@@ -325,20 +327,16 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   navContainer: {
     zIndex: 5,
-    paddingBottom: 8,
     paddingHorizontal: 0,
   },
   contentContainer: {
-    position: 'absolute',
-    top: NAVBAR_HEIGHT,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 10,
+    flex: 1,
     backgroundColor: '#fff',
+    padding: 8,
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
-    overflow: 'hidden',
+    zIndex: 10,
+    position: 'relative',
   },
   messageContainer: {
     flex: 1,

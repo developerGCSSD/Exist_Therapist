@@ -69,7 +69,7 @@ export default function MyRequestScreen() {
       end={{ x: 1, y: 0 }}
       style={styles.gradientBackground}
     >
-      <TopNavBar title="My Request" showBell={true} />
+      <TopNavBar title="My Request" showBell={true} showHamburger={true} />
 
       <View style={styles.container}>
         <ControlTabs
